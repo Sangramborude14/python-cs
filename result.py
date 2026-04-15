@@ -25,7 +25,7 @@ def marks_to_grade_point(marks):
 
 def analyze_results(file_path):
     print("\n" + "="*50)
-    print("  NIT HAMIRPUR - SEMESTER RESULT (SGPA)  ")
+    print("Result")
     print("="*50)
     
     try:
@@ -56,10 +56,10 @@ def analyze_results(file_path):
 def search_portal(df, subjects):
     print("\n" + "-"*50)
     print("        NITH STUDENT SEARCH PORTAL        ")
-    print("-"*50)
+    print("-"*50)   
     
     while True:
-        user_input = input("\nEnter Roll No (e.g., 25DEC024) or 'exit': ").strip().upper()
+        user_input = input("\nEnter Roll No  or 'exit': ").strip().upper()
         
         if user_input == 'EXIT': break
         
@@ -86,7 +86,7 @@ def search_portal(df, subjects):
             visualizer.plot_student_result(s['Name'], s['RollNo'], subjects, marks_list)
                 
         else:
-            print(f"❌ Roll No {user_input} not found.")
+            print(f" Roll No {user_input} not found.")
 
 if __name__ == "__main__":
     df, subjects = analyze_results("marks.csv")
