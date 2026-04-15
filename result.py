@@ -1,9 +1,5 @@
-# External 
 import pandas as pd
-import numpy as np
-import os
-#local
-import visualizer
+import visualizer  
 
 SUBJECT_CREDITS = {
     'PH-101': 3,
@@ -17,9 +13,19 @@ SUBJECT_CREDITS = {
     'HS-102': 1
 }
 
+def marks_to_grade_point(marks):
+    """Converts raw marks (0-100) into a standard 10-point grade scale."""
+    if marks >= 85: return 10
+    elif marks >= 75: return 9
+    elif marks >= 65: return 8
+    elif marks >= 55: return 7
+    elif marks >= 45: return 6
+    elif marks >= 35: return 5
+    else: return 0  
+
 def analyze_results(file_path):
     print("\n" + "="*50)
-    print("  NIT HAMIRPUR - SEMESTER RESULT  ")
+    print("  NIT HAMIRPUR - SEMESTER RESULT (SGPA)  ")
     print("="*50)
     
     try:
@@ -28,11 +34,18 @@ def analyze_results(file_path):
         subjects = list(SUBJECT_CREDITS.keys())
         
         df['Total_Marks'] = df[subjects].sum(axis=1)
-        max_marks = len(subjects) * 100
-        df['Percentage'] = (df['Total_Marks'] / max_marks) * 100
+        
+        total_credits = sum(SUBJECT_CREDITS.values()) 
+        df['Total_Credit_Points'] = 0 
+        
+        for sub, credits in SUBJECT_CREDITS.items():
+            grade_points = df[sub].apply(marks_to_grade_point)
+            df['Total_Credit_Points'] += (grade_points * credits)
+            
+        df['SGPA'] = (df['Total_Credit_Points'] / total_credits).round(2)
         
         df.to_csv("final_results.csv", index=False)
-        print(f"Success: Full marks report saved to 'final_results.csv'")
+        print(f"Success: Full SGPA report saved to 'final_results.csv'")
         
         return df, subjects
 
@@ -42,7 +55,7 @@ def analyze_results(file_path):
 
 def search_portal(df, subjects):
     print("\n" + "-"*50)
-    print("         NITH STUDENT SEARCH PORTAL         ")
+    print("        NITH STUDENT SEARCH PORTAL        ")
     print("-"*50)
     
     while True:
@@ -55,20 +68,23 @@ def search_portal(df, subjects):
             s = student.iloc[0]
             print("\n" + "*"*40)
             print(f" NAME:        {s['Name']}")
-            print(f" FATHER NAME: {s['FatherName']}")
+            print(f" FATHER'S NAME: {s['FatherName']}")
             print(f" ROLL NUMBER: {s['RollNo']}")
             print("-" * 40)
-            print(f" TOTAL MARKS: {s['Total_Marks']} / {len(subjects) * 100}")
-            print(f" PERCENTAGE:  {s['Percentage']:.2f}%")
+            print(f" TOTAL MARKS: {s['Total_Marks']}")
+            print(f" SGPA:        {s['SGPA']} / 10.00") 
             print("*"*40)
             
-            print("\nSUBJECT-WISE MARKS:")
-            marks_list = []
+            print("\nSUBJECT-WISE BREAKDOWN:")
+            marks_list = []  
             for sub in subjects:
-                print(f" {sub}: {s[sub]}")
-                marks_list.append(s[sub])
-            
+                raw_mark = s[sub]
+                gp = marks_to_grade_point(raw_mark)
+                print(f" {sub}: {raw_mark:3} marks (Grade Point: {gp})")
+                marks_list.append(raw_mark) 
+                
             visualizer.plot_student_result(s['Name'], s['RollNo'], subjects, marks_list)
+                
         else:
             print(f"❌ Roll No {user_input} not found.")
 
